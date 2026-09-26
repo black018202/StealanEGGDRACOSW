@@ -313,7 +313,7 @@ local function doReturn()
     teleportTo(ZONA_SEGURA)
     holdPosition(ZONA_SEGURA, COOLDOWN)
     teleportTo(posOriginal)
-    task.wait(0.1)
+    task.wait(0.0)
     processando = false
 end
 
