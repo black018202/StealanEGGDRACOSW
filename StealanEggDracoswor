@@ -24,7 +24,7 @@ local COR_VERDE_NEON = Color3.fromRGB(0, 255, 120)
 local COR_BORDA_PRETA = Color3.fromRGB(0, 0, 0)
 
 -- CONFIG
-local COOLDOWN = 0.3
+local COOLDOWN = 0.2
 local ZONA_SEGURA = Vector3.new(541.5, 70.7, -368.4)
 local ID_ICONE = "rbxassetid://81015096581028"
 
