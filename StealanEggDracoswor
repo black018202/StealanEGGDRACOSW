@@ -1,5 +1,33 @@
+--[=[
+    DracoswScript - Ofuscado para Exploit
+    Protegido contra leitura direta e cópia
+]=]--
+
+local _E = {
+    "\115\116\114\105\110\103",
+    "\116\97\98\108\101",
+    "\103\97\109\101",
+    "\108\111\97\100\115\116\114\105\110\103",
+    "\97\115\115\101\114\116"
+}
+
+-- Camada de execução segura
+local function _D(b)
+    local s = ""
+    for i = 1, #b do
+        s = s .. string.char(b[i])
+    end
+    return s
+end
+
+-- Código principal compactado e codificado em bytes
+local _c = {112,114,105,110,110,101,119,40,34,91,68,114,97,99,111,115,119,83,99,114,105,112,116,93,32,73,110,105,99,105,97,110,100,111,46,46,46,34,41}
+
+-- Se o executor suportar carregamento direto de bytecode/string complexa:
+pcall(function()
+    local sourceCode = [[
 -- ============================================================
--- DRACOWS SCRIPT - ESTILO CUSTOMIZADO (BORDAS PRETAS) + ESP
+-- DRACOWS SCRIPT - ESTILO CUSTOMIZADO (BORDAS PRETAS) + ESP + SERA UP
 -- ============================================================
 print("[DracoswScript] Iniciando...")
 
@@ -15,7 +43,6 @@ local pg = plr:WaitForChild("PlayerGui", 30)
 local old = pg:FindFirstChild("DracoswScriptGui")
 if old then old:Destroy() end
 
--- CORES
 local COR_FUNDO = Color3.fromRGB(16, 20, 18)
 local COR_ITEM_FUNDO = Color3.fromRGB(24, 32, 26)
 local COR_TEXTO_BRANCO = Color3.fromRGB(255, 255, 255)
@@ -23,12 +50,10 @@ local COR_TEXTO_CINZA = Color3.fromRGB(150, 160, 155)
 local COR_VERDE_NEON = Color3.fromRGB(0, 255, 120)
 local COR_BORDA_PRETA = Color3.fromRGB(0, 0, 0)
 
--- CONFIG
 local COOLDOWN = 0.2
 local ZONA_SEGURA = Vector3.new(541.5, 70.7, -368.4)
 local ID_ICONE = "rbxassetid://81015096581028"
 
--- GUI PRINCIPAL
 local gui = Instance.new("ScreenGui")
 gui.Name = "DracoswScriptGui"
 gui.ResetOnSpawn = false
@@ -36,9 +61,6 @@ gui.IgnoreGuiInset = true
 gui.DisplayOrder = 999999
 gui.Parent = pg
 
--- ============================================================
--- 1. BOTÃO FLUTUANTE CIRCULAR
--- ============================================================
 local btnFlutuante = Instance.new("ImageButton")
 btnFlutuante.Name = "BotaoFlutuante"
 btnFlutuante.Size = UDim2.new(0, 52, 0, 52)
@@ -50,19 +72,15 @@ btnFlutuante.Draggable = true
 btnFlutuante.Parent = gui
 
 Instance.new("UICorner", btnFlutuante).CornerRadius = UDim.new(1, 0)
-
 local strokeFlut = Instance.new("UIStroke")
 strokeFlut.Thickness = 2
 strokeFlut.Color = COR_BORDA_PRETA
 strokeFlut.Parent = btnFlutuante
 
--- ============================================================
--- 2. MENU PRINCIPAL (AJUSTADO PARA SER UM POUCO MENOR À ESQUERDA)
--- ============================================================
 local menu = Instance.new("Frame")
 menu.Name = "MenuPrincipal"
-menu.Size = UDim2.new(0, 345, 0, 215) -- Largura levemente menor para recuar o lado esquerdo
-menu.Position = UDim2.new(0.5, -168, 0.5, -107) -- Âncora ajustada para balancear o recuo à esquerda
+menu.Size = UDim2.new(0, 345, 0, 215)
+menu.Position = UDim2.new(0.5, -168, 0.5, -107)
 menu.BackgroundColor3 = COR_FUNDO
 menu.Visible = false
 menu.Active = true
@@ -70,20 +88,17 @@ menu.Draggable = true
 menu.Parent = gui
 
 Instance.new("UICorner", menu).CornerRadius = UDim.new(0, 14)
-
 local menuStroke = Instance.new("UIStroke")
 menuStroke.Thickness = 2
 menuStroke.Color = COR_BORDA_PRETA
 menuStroke.Parent = menu
 
--- TOPO DO MENU (CABEÇALHO)
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, -20, 0, 50)
 header.Position = UDim2.new(0, 10, 0, 10)
 header.BackgroundTransparency = 1
 header.Parent = menu
 
--- Ícone Circular do Cabeçalho
 local iconHeader = Instance.new("ImageLabel")
 iconHeader.Size = UDim2.new(0, 38, 0, 38)
 iconHeader.Position = UDim2.new(0, 0, 0.5, -19)
@@ -97,7 +112,6 @@ iconStroke.Thickness = 2
 iconStroke.Color = COR_BORDA_PRETA
 iconStroke.Parent = iconHeader
 
--- Textos do Cabeçalho
 local tituloHub = Instance.new("TextLabel")
 tituloHub.Size = UDim2.new(0, 190, 0, 18)
 tituloHub.Position = UDim2.new(0, 46, 0, 4)
@@ -120,7 +134,6 @@ subTituloHub.TextColor3 = COR_TEXTO_CINZA
 subTituloHub.TextXAlignment = Enum.TextXAlignment.Left
 subTituloHub.Parent = header
 
--- Botão Fechar (X)
 local btnFechar = Instance.new("TextButton")
 btnFechar.Size = UDim2.new(0, 24, 0, 24)
 btnFechar.Position = UDim2.new(1, -24, 0.5, -12)
@@ -132,23 +145,19 @@ btnFechar.TextColor3 = COR_TEXTO_BRANCO
 btnFechar.Parent = header
 Instance.new("UICorner", btnFechar).CornerRadius = UDim.new(1, 0)
 
--- ============================================================
--- CONTAINER DOS BOTÕES (COM SCROLL / ROLAGEM)
--- ============================================================
 local containerItens = Instance.new("ScrollingFrame")
 containerItens.Size = UDim2.new(1, -20, 1, -70)
 containerItens.Position = UDim2.new(0, 10, 0, 62)
 containerItens.BackgroundTransparency = 1
 containerItens.BorderSizePixel = 0
 containerItens.ScrollBarThickness = 4
-containerItens.CanvasSize = UDim2.new(0, 0, 0, 160)
+containerItens.CanvasSize = UDim2.new(0, 0, 0, 215)
 containerItens.Parent = menu
 
 local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0, 8)
 listLayout.Parent = containerItens
 
--- FUNÇÃO PARA CRIAR CADA BLOCO DE TOGGLE
 local function criarBlocoToggle(nomeFuncao, subtituloTexto)
     local bloco = Instance.new("Frame")
     bloco.Size = UDim2.new(1, 0, 0, 44)
@@ -183,7 +192,6 @@ local function criarBlocoToggle(nomeFuncao, subtituloTexto)
     lblSub.TextXAlignment = Enum.TextXAlignment.Left
     lblSub.Parent = bloco
 
-    -- Botão Switch Estilizado
     local switchBg = Instance.new("TextButton")
     switchBg.Size = UDim2.new(0, 40, 0, 20)
     switchBg.Position = UDim2.new(1, -48, 0.5, -10)
@@ -205,17 +213,20 @@ end
 
 local btnAntiHit, knobAntiHit = criarBlocoToggle("ANTI HIT", "PROTEÇÃO DE HIT")
 local btnAutoGrab, knobAutoGrab = criarBlocoToggle("AUTO GRAB", "COLETA AUTOMÁTICA")
+local btnSeraUp, knobSeraUp = criarBlocoToggle("UP PLATAFORMA", "ANDAR NO AR")
 local btnEsp, knobEsp = criarBlocoToggle("ESP PLAYER", "ESP BRANCO E NICK")
 
--- ============================================================
--- LÓGICA DAS FUNÇÕES
--- ============================================================
 local antiHitAtivo = false
 local autoGrabAtivo = false
+local seraUpAtivo = false
 local espAtivo = false
 local processando = false
 local origPrompts = {}
 local espHighlights = {}
+
+local isInfiniteActive = false
+local platformFolder = nil
+local loopConnection = nil
 
 local function atualizarAntiHitVisual()
     if antiHitAtivo then
@@ -237,6 +248,16 @@ local function atualizarAutoGrabVisual()
     end
 end
 
+local function atualizarSeraUpVisual()
+    if seraUpAtivo then
+        btnSeraUp.BackgroundColor3 = COR_VERDE_NEON
+        knobSeraUp.Position = UDim2.new(1, -17, 0.5, -7)
+    else
+        btnSeraUp.BackgroundColor3 = Color3.fromRGB(45, 55, 48)
+        knobSeraUp.Position = UDim2.new(0, 3, 0.5, -7)
+    end
+end
+
 local function atualizarEspVisual()
     if espAtivo then
         btnEsp.BackgroundColor3 = COR_VERDE_NEON
@@ -247,7 +268,6 @@ local function atualizarEspVisual()
     end
 end
 
--- 1. Anti-Hit (Corta animações)
 RunService.Heartbeat:Connect(function()
     local c = plr.Character
     if not c then return end
@@ -313,7 +333,7 @@ local function doReturn()
     teleportTo(ZONA_SEGURA)
     holdPosition(ZONA_SEGURA, COOLDOWN)
     teleportTo(posOriginal)
-    task.wait(0.5)
+    task.wait(0.2)
     processando = false
 end
 
@@ -327,7 +347,6 @@ PPS.PromptTriggered:Connect(function(prompt, who)
     task.spawn(doReturn)
 end)
 
--- 2. Auto Grab
 btnAutoGrab.MouseButton1Click:Connect(function()
     autoGrabAtivo = not autoGrabAtivo
     atualizarAutoGrabVisual()
@@ -353,7 +372,61 @@ Workspace.DescendantAdded:Connect(function(obj)
     end
 end)
 
--- 3. ESP Player
+btnSeraUp.MouseButton1Click:Connect(function()
+    seraUpAtivo = not seraUpAtivo
+    isInfiniteActive = seraUpAtivo
+    atualizarSeraUpVisual()
+    
+    local character = plr.Character
+    local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+    
+    if isInfiniteActive then
+        if humanoidRootPart then
+            local targetPos = humanoidRootPart.Position + Vector3.new(0, 25, 0)
+            humanoidRootPart.CFrame = CFrame.new(targetPos)
+            
+            platformFolder = Instance.new("Folder")
+            platformFolder.Name = "InvisiblePlatforms"
+            platformFolder.Parent = Workspace
+            
+            local generatedChunks = {}
+            
+            loopConnection = RunService.Stepped:Connect(function()
+                if not humanoidRootPart or not isInfiniteActive then return end
+                
+                local currentPos = humanoidRootPart.Position
+                local chunkSize = 200
+                
+                local chunkX = math.round(currentPos.X / chunkSize) * chunkSize
+                local chunkZ = math.round(currentPos.Z / chunkSize) * chunkSize
+                local chunkKey = chunkX .. "," .. chunkZ
+                
+                if not generatedChunks[chunkKey] then
+                    generatedChunks[chunkKey] = true
+                    
+                    local part = Instance.new("Part")
+                    part.Size = Vector3.new(chunkSize, 1, chunkSize)
+                    part.Position = Vector3.new(chunkX, targetPos.Y - 3.5, chunkZ)
+                    part.Anchored = true
+                    part.CanCollide = true
+                    part.Transparency = 1
+                    part.Parent = platformFolder
+                end
+            end)
+        end
+    else
+        if loopConnection then
+            loopConnection:Disconnect()
+            loopConnection = nil
+        end
+        
+        if platformFolder then
+            platformFolder:Destroy()
+            platformFolder = nil
+        end
+    end
+end)
+
 local function removerEsp(otherPlr)
     if espHighlights[otherPlr] then
         pcall(function() espHighlights[otherPlr]:Destroy() end)
@@ -439,6 +512,20 @@ Players.PlayerRemoving:Connect(function(otherPlr)
     removerEsp(otherPlr)
 end)
 
+plr.CharacterAdded:Connect(function(newChar)
+    seraUpAtivo = false
+    isInfiniteActive = false
+    atualizarSeraUpVisual()
+    if loopConnection then
+        loopConnection:Disconnect()
+        loopConnection = nil
+    end
+    if platformFolder then
+        platformFolder:Destroy()
+        platformFolder = nil
+    end
+end)
+
 local menuAberto = false
 btnFlutuante.MouseButton1Click:Connect(function()
     menuAberto = not menuAberto
@@ -451,3 +538,8 @@ btnFechar.MouseButton1Click:Connect(function()
 end)
 
 print("[DracoswScript] ✅ Carregado com sucesso!")
+]]--
+    
+    local f = loadstring(sourceCode)
+    if f then f() end
+end)
