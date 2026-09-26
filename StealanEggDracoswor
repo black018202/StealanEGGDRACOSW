@@ -1,0 +1,453 @@
+-- ============================================================
+-- DRACOWS SCRIPT - ESTILO CUSTOMIZADO (BORDAS PRETAS) + ESP
+-- ============================================================
+print("[DracoswScript] Iniciando...")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local PPS = game:GetService("ProximityPromptService")
+
+local plr = Players.LocalPlayer
+local pg = plr:WaitForChild("PlayerGui", 30)
+
+local old = pg:FindFirstChild("DracoswScriptGui")
+if old then old:Destroy() end
+
+-- CORES
+local COR_FUNDO = Color3.fromRGB(16, 20, 18)
+local COR_ITEM_FUNDO = Color3.fromRGB(24, 32, 26)
+local COR_TEXTO_BRANCO = Color3.fromRGB(255, 255, 255)
+local COR_TEXTO_CINZA = Color3.fromRGB(150, 160, 155)
+local COR_VERDE_NEON = Color3.fromRGB(0, 255, 120)
+local COR_BORDA_PRETA = Color3.fromRGB(0, 0, 0)
+
+-- CONFIG
+local COOLDOWN = 0.3
+local ZONA_SEGURA = Vector3.new(541.5, 70.7, -368.4)
+local ID_ICONE = "rbxassetid://81015096581028"
+
+-- GUI PRINCIPAL
+local gui = Instance.new("ScreenGui")
+gui.Name = "DracoswScriptGui"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 999999
+gui.Parent = pg
+
+-- ============================================================
+-- 1. BOTÃO FLUTUANTE CIRCULAR
+-- ============================================================
+local btnFlutuante = Instance.new("ImageButton")
+btnFlutuante.Name = "BotaoFlutuante"
+btnFlutuante.Size = UDim2.new(0, 52, 0, 52)
+btnFlutuante.Position = UDim2.new(0, 20, 0.5, -26)
+btnFlutuante.BackgroundColor3 = COR_ITEM_FUNDO
+btnFlutuante.Image = ID_ICONE
+btnFlutuante.Active = true
+btnFlutuante.Draggable = true
+btnFlutuante.Parent = gui
+
+Instance.new("UICorner", btnFlutuante).CornerRadius = UDim.new(1, 0)
+
+local strokeFlut = Instance.new("UIStroke")
+strokeFlut.Thickness = 2
+strokeFlut.Color = COR_BORDA_PRETA
+strokeFlut.Parent = btnFlutuante
+
+-- ============================================================
+-- 2. MENU PRINCIPAL (AJUSTADO PARA SER UM POUCO MENOR À ESQUERDA)
+-- ============================================================
+local menu = Instance.new("Frame")
+menu.Name = "MenuPrincipal"
+menu.Size = UDim2.new(0, 345, 0, 215) -- Largura levemente menor para recuar o lado esquerdo
+menu.Position = UDim2.new(0.5, -168, 0.5, -107) -- Âncora ajustada para balancear o recuo à esquerda
+menu.BackgroundColor3 = COR_FUNDO
+menu.Visible = false
+menu.Active = true
+menu.Draggable = true
+menu.Parent = gui
+
+Instance.new("UICorner", menu).CornerRadius = UDim.new(0, 14)
+
+local menuStroke = Instance.new("UIStroke")
+menuStroke.Thickness = 2
+menuStroke.Color = COR_BORDA_PRETA
+menuStroke.Parent = menu
+
+-- TOPO DO MENU (CABEÇALHO)
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, -20, 0, 50)
+header.Position = UDim2.new(0, 10, 0, 10)
+header.BackgroundTransparency = 1
+header.Parent = menu
+
+-- Ícone Circular do Cabeçalho
+local iconHeader = Instance.new("ImageLabel")
+iconHeader.Size = UDim2.new(0, 38, 0, 38)
+iconHeader.Position = UDim2.new(0, 0, 0.5, -19)
+iconHeader.BackgroundColor3 = COR_ITEM_FUNDO
+iconHeader.Image = ID_ICONE
+iconHeader.Parent = header
+Instance.new("UICorner", iconHeader).CornerRadius = UDim.new(1, 0)
+
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Thickness = 2
+iconStroke.Color = COR_BORDA_PRETA
+iconStroke.Parent = iconHeader
+
+-- Textos do Cabeçalho
+local tituloHub = Instance.new("TextLabel")
+tituloHub.Size = UDim2.new(0, 190, 0, 18)
+tituloHub.Position = UDim2.new(0, 46, 0, 4)
+tituloHub.BackgroundTransparency = 1
+tituloHub.Text = "DracoswScript"
+tituloHub.Font = Enum.Font.GothamBold
+tituloHub.TextSize = 14
+tituloHub.TextColor3 = COR_TEXTO_BRANCO
+tituloHub.TextXAlignment = Enum.TextXAlignment.Left
+tituloHub.Parent = header
+
+local subTituloHub = Instance.new("TextLabel")
+subTituloHub.Size = UDim2.new(0, 190, 0, 14)
+subTituloHub.Position = UDim2.new(0, 46, 0, 22)
+subTituloHub.BackgroundTransparency = 1
+subTituloHub.Text = "STEAL AN EGG"
+subTituloHub.Font = Enum.Font.GothamMedium
+subTituloHub.TextSize = 9
+subTituloHub.TextColor3 = COR_TEXTO_CINZA
+subTituloHub.TextXAlignment = Enum.TextXAlignment.Left
+subTituloHub.Parent = header
+
+-- Botão Fechar (X)
+local btnFechar = Instance.new("TextButton")
+btnFechar.Size = UDim2.new(0, 24, 0, 24)
+btnFechar.Position = UDim2.new(1, -24, 0.5, -12)
+btnFechar.BackgroundColor3 = COR_ITEM_FUNDO
+btnFechar.Text = "✕"
+btnFechar.Font = Enum.Font.GothamBold
+btnFechar.TextSize = 10
+btnFechar.TextColor3 = COR_TEXTO_BRANCO
+btnFechar.Parent = header
+Instance.new("UICorner", btnFechar).CornerRadius = UDim.new(1, 0)
+
+-- ============================================================
+-- CONTAINER DOS BOTÕES (COM SCROLL / ROLAGEM)
+-- ============================================================
+local containerItens = Instance.new("ScrollingFrame")
+containerItens.Size = UDim2.new(1, -20, 1, -70)
+containerItens.Position = UDim2.new(0, 10, 0, 62)
+containerItens.BackgroundTransparency = 1
+containerItens.BorderSizePixel = 0
+containerItens.ScrollBarThickness = 4
+containerItens.CanvasSize = UDim2.new(0, 0, 0, 160)
+containerItens.Parent = menu
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 8)
+listLayout.Parent = containerItens
+
+-- FUNÇÃO PARA CRIAR CADA BLOCO DE TOGGLE
+local function criarBlocoToggle(nomeFuncao, subtituloTexto)
+    local bloco = Instance.new("Frame")
+    bloco.Size = UDim2.new(1, 0, 0, 44)
+    bloco.BackgroundColor3 = COR_ITEM_FUNDO
+    bloco.Parent = containerItens
+    Instance.new("UICorner", bloco).CornerRadius = UDim.new(0, 10)
+    
+    local s = Instance.new("UIStroke")
+    s.Thickness = 1.5
+    s.Color = COR_BORDA_PRETA
+    s.Parent = bloco
+
+    local lblNome = Instance.new("TextLabel")
+    lblNome.Size = UDim2.new(0, 190, 0, 18)
+    lblNome.Position = UDim2.new(0, 12, 0, 6)
+    lblNome.BackgroundTransparency = 1
+    lblNome.Text = nomeFuncao
+    lblNome.Font = Enum.Font.GothamBold
+    lblNome.TextSize = 12
+    lblNome.TextColor3 = COR_TEXTO_BRANCO
+    lblNome.TextXAlignment = Enum.TextXAlignment.Left
+    lblNome.Parent = bloco
+
+    local lblSub = Instance.new("TextLabel")
+    lblSub.Size = UDim2.new(0, 190, 0, 14)
+    lblSub.Position = UDim2.new(0, 12, 0, 22)
+    lblSub.BackgroundTransparency = 1
+    lblSub.Text = subtituloTexto
+    lblSub.Font = Enum.Font.GothamMedium
+    lblSub.TextSize = 8
+    lblSub.TextColor3 = COR_TEXTO_CINZA
+    lblSub.TextXAlignment = Enum.TextXAlignment.Left
+    lblSub.Parent = bloco
+
+    -- Botão Switch Estilizado
+    local switchBg = Instance.new("TextButton")
+    switchBg.Size = UDim2.new(0, 40, 0, 20)
+    switchBg.Position = UDim2.new(1, -48, 0.5, -10)
+    switchBg.BackgroundColor3 = Color3.fromRGB(45, 55, 48)
+    switchBg.Text = ""
+    switchBg.AutoButtonColor = false
+    switchBg.Parent = bloco
+    Instance.new("UICorner", switchBg).CornerRadius = UDim.new(1, 0)
+
+    local switchKnob = Instance.new("Frame")
+    switchKnob.Size = UDim2.new(0, 14, 0, 14)
+    switchKnob.Position = UDim2.new(0, 3, 0.5, -7)
+    switchKnob.BackgroundColor3 = COR_TEXTO_BRANCO
+    switchKnob.Parent = switchBg
+    Instance.new("UICorner", switchKnob).CornerRadius = UDim.new(1, 0)
+
+    return switchBg, switchKnob
+end
+
+local btnAntiHit, knobAntiHit = criarBlocoToggle("ANTI HIT", "PROTEÇÃO DE HIT")
+local btnAutoGrab, knobAutoGrab = criarBlocoToggle("AUTO GRAB", "COLETA AUTOMÁTICA")
+local btnEsp, knobEsp = criarBlocoToggle("ESP PLAYER", "ESP BRANCO E NICK")
+
+-- ============================================================
+-- LÓGICA DAS FUNÇÕES
+-- ============================================================
+local antiHitAtivo = false
+local autoGrabAtivo = false
+local espAtivo = false
+local processando = false
+local origPrompts = {}
+local espHighlights = {}
+
+local function atualizarAntiHitVisual()
+    if antiHitAtivo then
+        btnAntiHit.BackgroundColor3 = COR_VERDE_NEON
+        knobAntiHit.Position = UDim2.new(1, -17, 0.5, -7)
+    else
+        btnAntiHit.BackgroundColor3 = Color3.fromRGB(45, 55, 48)
+        knobAntiHit.Position = UDim2.new(0, 3, 0.5, -7)
+    end
+end
+
+local function atualizarAutoGrabVisual()
+    if autoGrabAtivo then
+        btnAutoGrab.BackgroundColor3 = COR_VERDE_NEON
+        knobAutoGrab.Position = UDim2.new(1, -17, 0.5, -7)
+    else
+        btnAutoGrab.BackgroundColor3 = Color3.fromRGB(45, 55, 48)
+        knobAutoGrab.Position = UDim2.new(0, 3, 0.5, -7)
+    end
+end
+
+local function atualizarEspVisual()
+    if espAtivo then
+        btnEsp.BackgroundColor3 = COR_VERDE_NEON
+        knobEsp.Position = UDim2.new(1, -17, 0.5, -7)
+    else
+        btnEsp.BackgroundColor3 = Color3.fromRGB(45, 55, 48)
+        knobEsp.Position = UDim2.new(0, 3, 0.5, -7)
+    end
+end
+
+-- 1. Anti-Hit (Corta animações)
+RunService.Heartbeat:Connect(function()
+    local c = plr.Character
+    if not c then return end
+    local hum = c:FindFirstChildOfClass("Humanoid")
+    local animate = c:FindFirstChild("Animate")
+    
+    if antiHitAtivo and hum then
+        if animate then animate.Disabled = true end
+        pcall(function()
+            for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                track:Stop(0)
+            end
+        end)
+    else
+        if animate then animate.Disabled = false end
+    end
+end)
+
+local function teleportTo(pos)
+    local c = plr.Character
+    if not c then return false end
+    local r = c:FindFirstChild("HumanoidRootPart")
+    if not r then return false end
+    if r.Anchored then r.Anchored = false end
+    local rot = r.CFrame - r.CFrame.Position
+    local target = CFrame.new(pos) * rot
+    pcall(function() c:PivotTo(target) end)
+    pcall(function() r.CFrame = target end)
+    return true
+end
+
+local function holdPosition(pos, seconds)
+    local c = plr.Character
+    if not c then return end
+    local r = c:FindFirstChild("HumanoidRootPart")
+    if not r then return end
+    local rot = r.CFrame - r.CFrame.Position
+    local target = CFrame.new(pos) * rot
+    local endTime = tick() + seconds
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        if tick() >= endTime then
+            if conn then conn:Disconnect() end
+            return
+        end
+        if r and r.Parent then
+            r.CFrame = target
+            r.AssemblyLinearVelocity = Vector3.zero
+        end
+    end)
+    task.wait(seconds)
+    if conn then conn:Disconnect() end
+end
+
+local function doReturn()
+    if processando then return end
+    processando = true
+    local c = plr.Character
+    if not c then processando = false return end
+    local r = c:FindFirstChild("HumanoidRootPart")
+    if not r then processando = false return end
+    local posOriginal = r.Position
+    teleportTo(ZONA_SEGURA)
+    holdPosition(ZONA_SEGURA, COOLDOWN)
+    teleportTo(posOriginal)
+    task.wait(0.1)
+    processando = false
+end
+
+btnAntiHit.MouseButton1Click:Connect(function()
+    antiHitAtivo = not antiHitAtivo
+    atualizarAntiHitVisual()
+end)
+
+PPS.PromptTriggered:Connect(function(prompt, who)
+    if not antiHitAtivo or who ~= plr or processando then return end
+    task.spawn(doReturn)
+end)
+
+-- 2. Auto Grab
+btnAutoGrab.MouseButton1Click:Connect(function()
+    autoGrabAtivo = not autoGrabAtivo
+    atualizarAutoGrabVisual()
+    if autoGrabAtivo then
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") then
+                if not origPrompts[obj] then origPrompts[obj] = obj.HoldDuration end
+                obj.HoldDuration = 0
+            end
+        end
+    else
+        for obj, h in pairs(origPrompts) do
+            pcall(function() if obj and obj.Parent then obj.HoldDuration = h end end)
+        end
+        origPrompts = {}
+    end
+end)
+
+Workspace.DescendantAdded:Connect(function(obj)
+    if autoGrabAtivo and obj:IsA("ProximityPrompt") then
+        if not origPrompts[obj] then origPrompts[obj] = obj.HoldDuration end
+        obj.HoldDuration = 0
+    end
+end)
+
+-- 3. ESP Player
+local function removerEsp(otherPlr)
+    if espHighlights[otherPlr] then
+        pcall(function() espHighlights[otherPlr]:Destroy() end)
+        espHighlights[otherPlr] = nil
+    end
+    if otherPlr.Character then
+        local head = otherPlr.Character:FindFirstChild("Head")
+        if head then
+            local tag = head:FindFirstChild("DracoswESP_Tag")
+            if tag then tag:Destroy() end
+        end
+    end
+end
+
+local function atualizarEspParaJogador(otherPlr)
+    if otherPlr == plr then return end
+    local char = otherPlr.Character
+    if not espAtivo or not char or not char:FindFirstChild("HumanoidRootPart") then
+        removerEsp(otherPlr)
+        return
+    end
+
+    local hl = espHighlights[otherPlr]
+    if not hl or not hl.Parent then
+        hl = Instance.new("Highlight")
+        hl.Name = "DracoswESP_Highlight"
+        hl.FillColor = Color3.fromRGB(255, 255, 255)
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.5
+        hl.OutlineTransparency = 0
+        hl.Adornee = char
+        hl.Parent = char
+        espHighlights[otherPlr] = hl
+    else
+        hl.Adornee = char
+    end
+
+    local head = char:FindFirstChild("Head")
+    if head then
+        local tag = head:FindFirstChild("DracoswESP_Tag")
+        if not tag then
+            tag = Instance.new("BillboardGui")
+            tag.Name = "DracoswESP_Tag"
+            tag.Size = UDim2.new(0, 100, 0, 40)
+            tag.StudsOffset = Vector3.new(0, 2.5, 0)
+            tag.AlwaysOnTop = true
+            tag.Parent = head
+
+            local txt = Instance.new("TextLabel")
+            txt.Name = "TextoNick"
+            txt.Size = UDim2.new(1, 0, 1, 0)
+            txt.BackgroundTransparency = 1
+            txt.Font = Enum.Font.GothamBold
+            txt.TextSize = 12
+            txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+            txt.TextStrokeTransparency = 0
+            txt.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            txt.Text = otherPlr.Name
+            txt.Parent = tag
+        end
+    end
+end
+
+btnEsp.MouseButton1Click:Connect(function()
+    espAtivo = not espAtivo
+    atualizarEspVisual()
+    if not espAtivo then
+        for p, _ in pairs(espHighlights) do
+            removerEsp(p)
+        end
+        espHighlights = {}
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not espAtivo then return end
+    for _, otherPlr in ipairs(Players:GetPlayers()) do
+        atualizarEspParaJogador(otherPlr)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(otherPlr)
+    removerEsp(otherPlr)
+end)
+
+local menuAberto = false
+btnFlutuante.MouseButton1Click:Connect(function()
+    menuAberto = not menuAberto
+    menu.Visible = menuAberto
+end)
+
+btnFechar.MouseButton1Click:Connect(function()
+    menuAberto = false
+    menu.Visible = false
+end)
+
+print("[DracoswScript] ✅ Carregado com sucesso!")
