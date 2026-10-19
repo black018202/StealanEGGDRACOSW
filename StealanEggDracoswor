@@ -2,6 +2,7 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local CoreGui = game:GetService("CoreGui")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 -- Remove interface antiga se existir
 if CoreGui:FindFirstChild("DracoswHubGui") then
@@ -14,47 +15,65 @@ ScreenGui.Name = "DracoswHubGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
--- Frame Principal (Menu Grande no Centro)
+-- Frame Principal (Largura Mantida, Altura Menor e FIXO)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 550, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -275, 0.5, -160)
+MainFrame.Size = UDim2.new(0, 550, 0, 230)
+MainFrame.Position = UDim2.new(0.5, -275, 0.5, -115)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12) -- Preto fosco
 MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true -- Permite arrastar o menu na tela
+MainFrame.Active = false
+MainFrame.Draggable = false -- Interface fixa
 MainFrame.Parent = ScreenGui
 
--- Bordas Arredondadas
+-- Bordas Arredondadas da Janela
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 14)
 UICorner.Parent = MainFrame
 
--- Contorno Vermelho (Linha em Volta)
+-- Contorno Vermelho Estilizado
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 0, 50) -- Vermelho neon
-UIStroke.Thickness = 2.5
+UIStroke.Color = Color3.fromRGB(255, 30, 60)
+UIStroke.Thickness = 3
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStroke.Parent = MainFrame
+
+-- Gradiente para a Borda Vermelha
+local StrokeGradient = Instance.new("UIGradient")
+StrokeGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 50)),
+    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 80, 100)),
+    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(200, 0, 40))
+}
+StrokeGradient.Rotation = 45
+StrokeGradient.Parent = UIStroke
 
 -- Linha de Detalhe Interna Superior
 local TopRedLine = Instance.new("Frame")
 TopRedLine.Name = "TopRedLine"
 TopRedLine.Size = UDim2.new(1, -20, 0, 2)
-TopRedLine.Position = UDim2.new(0, 10, 0, 65)
-TopRedLine.BackgroundColor3 = Color3.fromRGB(255, 0, 50)
+TopRedLine.Position = UDim2.new(0, 10, 0, 55)
+TopRedLine.BackgroundColor3 = Color3.fromRGB(255, 30, 60)
 TopRedLine.BorderSizePixel = 0
 TopRedLine.Parent = MainFrame
 
--- Título Principal
+local LineGradient = Instance.new("UIGradient")
+LineGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 50)),
+    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 100, 120)),
+    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 50))
+}
+LineGradient.Parent = TopRedLine
+
+-- Container do Título
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, -50, 0, 55)
-Title.Position = UDim2.new(0, 10, 0, 5)
+Title.Size = UDim2.new(1, -50, 0, 50)
+Title.Position = UDim2.new(0, 10, 0, 2)
 Title.BackgroundTransparency = 1
-Title.Text = "UPDATE! DRACOSW HUB"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 28
+Title.RichText = true -- Habilita customização via HTML tags
+Title.Text = '<font color="rgb(255,30,60)">DRACOSW</font> <font color="rgb(255,255,255)">HUB</font> <font color="rgb(255,30,60)">|</font> <font color="rgb(255,255,255)">UPDATE!!!</font>'
+Title.TextSize = 26 -- Tamanho grande das letras
 Title.Font = Enum.Font.FredokaOne
 Title.TextXAlignment = Enum.TextXAlignment.Center
 Title.Parent = MainFrame
@@ -62,12 +81,12 @@ Title.Parent = MainFrame
 -- Botão de Fechar Menu (X)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 32, 0, 32)
-CloseBtn.Position = UDim2.new(1, -42, 0, 14)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -40, 0, 12)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-CloseBtn.TextSize = 18
+CloseBtn.TextSize = 16
 CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.Parent = MainFrame
 
@@ -76,8 +95,8 @@ CloseCorner.CornerRadius = UDim.new(0, 8)
 CloseCorner.Parent = CloseBtn
 
 local CloseStroke = Instance.new("UIStroke")
-CloseStroke.Color = Color3.fromRGB(255, 0, 50)
-CloseStroke.Thickness = 1.5
+CloseStroke.Color = Color3.fromRGB(255, 30, 60)
+CloseStroke.Thickness = 1.8
 CloseStroke.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function()
@@ -86,16 +105,16 @@ end)
 
 -- Container Central
 local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, -40, 1, -95)
-ContentFrame.Position = UDim2.new(0, 20, 0, 80)
+ContentFrame.Size = UDim2.new(1, -40, 1, -75)
+ContentFrame.Position = UDim2.new(0, 20, 0, 65)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
 -- Botão do Discord
 local DiscordBtn = Instance.new("TextButton")
 DiscordBtn.Name = "DiscordBtn"
-DiscordBtn.Size = UDim2.new(1, 0, 0, 70)
-DiscordBtn.Position = UDim2.new(0, 0, 0.5, -35)
+DiscordBtn.Size = UDim2.new(1, 0, 0, 65)
+DiscordBtn.Position = UDim2.new(0, 0, 0, 15)
 DiscordBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 DiscordBtn.Text = ""
 DiscordBtn.Parent = ContentFrame
@@ -105,19 +124,38 @@ BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DiscordBtn
 
 local BtnStroke = Instance.new("UIStroke")
-BtnStroke.Color = Color3.fromRGB(255, 0, 50)
-BtnStroke.Thickness = 2
+BtnStroke.Color = Color3.fromRGB(255, 30, 60)
+BtnStroke.Thickness = 2.2
 BtnStroke.Parent = DiscordBtn
 
--- Imagem do Discord (Com o ID 10367063084)
+local BtnStrokeGradient = Instance.new("UIGradient")
+BtnStrokeGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 30, 60)),
+    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(180, 0, 40))
+}
+BtnStrokeGradient.Parent = BtnStroke
+
+-- Adesivo do Discord
 local DiscordIcon = Instance.new("ImageLabel")
 DiscordIcon.Name = "DiscordIcon"
-DiscordIcon.Size = UDim2.new(0, 40, 0, 40)
-DiscordIcon.Position = UDim2.new(0, 20, 0.5, -20)
+DiscordIcon.Size = UDim2.new(0, 42, 0, 42)
+DiscordIcon.Position = UDim2.new(0, 18, 0.5, -21)
 DiscordIcon.BackgroundTransparency = 1
-DiscordIcon.Image = "rbxassetid://10367063084" -- Novo ID configurado
-DiscordIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 DiscordIcon.Parent = DiscordBtn
+
+-- Função para carregar o ID do Adesivo do Roblox
+task.spawn(function()
+    local decalAssetId = 132825744969037
+    local success, assetInfo = pcall(function()
+        return MarketplaceService:GetProductInfo(decalAssetId)
+    end)
+
+    if success and assetInfo and assetInfo.AssetTypeId == 13 then
+        DiscordIcon.Image = "rbxassetid://" .. tostring(decalAssetId)
+    else
+        DiscordIcon.Image = "http://www.roblox.com/asset/?id=" .. tostring(decalAssetId)
+    end
+end)
 
 -- Texto do Botão
 local BtnText = Instance.new("TextLabel")
@@ -135,7 +173,7 @@ BtnText.Parent = DiscordBtn
 -- Texto de Status
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Size = UDim2.new(1, 0, 0, 25)
-StatusLabel.Position = UDim2.new(0, 0, 1, -30)
+StatusLabel.Position = UDim2.new(0, 0, 1, -28)
 StatusLabel.BackgroundTransparency = 1
 StatusLabel.Text = ""
 StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
@@ -151,7 +189,7 @@ DiscordBtn.MouseButton1Click:Connect(function()
         
         BtnStroke.Color = Color3.fromRGB(0, 255, 120)
         task.wait(1.5)
-        BtnStroke.Color = Color3.fromRGB(255, 0, 50)
+        BtnStroke.Color = Color3.fromRGB(255, 30, 60)
         StatusLabel.Text = ""
     else
         StatusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
